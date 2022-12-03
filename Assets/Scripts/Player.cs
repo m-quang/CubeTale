@@ -5,6 +5,8 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -43,7 +45,20 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.DrawRay(mTransform.position, new Vector3(0, -1, 0), Color.red);
+        //Debug.DrawRay(mTransform.position, new Vector3(0, -1, 0), Color.red);
+        if (currentStandingBlock)
+        {
+            Debug.DrawRay(currentStandingBlock.transform.position + new Vector3(0, 1, 0), new Vector3(0, -1, 0), Color.red);
+        }        
+        if (prevousStandBlock)
+        {
+            Debug.DrawRay(prevousStandBlock.transform.position + new Vector3(0, 1, 0), new Vector3(0, -1, 0), Color.green);
+        }        
+        if (nextBlock)
+        {
+            Debug.DrawRay(nextBlock.transform.position + new Vector3(0, 1, 0), new Vector3(0, -1, 0), Color.blue);
+        }
+
 
         //
         mTransform.position = Vector3.MoveTowards(mTransform.position, currentPosition, speed * Time.deltaTime);
@@ -51,57 +66,61 @@ public class Player : MonoBehaviour
         string current_animation = animatorinfo[0].clip.name;
 
         //
-        if(current_animation == "Idle")
+        if(!Game.Instance.isWin)
         {
-            if (Input.anyKeyDown)
+            if (current_animation == "Idle")
             {
-                if (Input.GetKeyDown(KeyCode.LeftArrow))
+                if (Input.anyKeyDown)
                 {
-                    speed = 1.2f;
-                    prevPosition = currentPosition;
-                    currentPosition = mTransform.position + new Vector3(-1, 0, 0);
-                    nextPosition = currentPosition + (currentPosition - mTransform.position);
-                    mTransform.rotation = new Quaternion(0, 0, 0, 0);
-                    mTransform.Rotate(0, -90, 0);
-                    currentPosition = new Vector3(Mathf.Round(currentPosition.x), Mathf.Round(currentPosition.y), Mathf.Round(currentPosition.z));
-                    mAnimator.Play("Move");
-                }
-                if (Input.GetKeyDown(KeyCode.RightArrow))
-                {
-                    speed = 1.2f;
-                    prevPosition = currentPosition;
-                    currentPosition = mTransform.position + new Vector3(1, 0, 0);
-                    nextPosition = currentPosition + (currentPosition - mTransform.position);
-                    mTransform.rotation = new Quaternion(0, 0, 0, 0);
-                    mTransform.Rotate(0, 90, 0);
-                    currentPosition = new Vector3(Mathf.Round(currentPosition.x), Mathf.Round(currentPosition.y), Mathf.Round(currentPosition.z));
-                    mAnimator.Play("Move");
-                }
-                if (Input.GetKeyDown(KeyCode.UpArrow))
-                {
-                    speed = 1.2f;
-                    prevPosition = currentPosition;
-                    currentPosition = mTransform.position + new Vector3(0, 0, 1);
-                    nextPosition = currentPosition + (currentPosition - mTransform.position);
-                    mTransform.rotation = new Quaternion(0, 0, 0, 0);
-                    mTransform.Rotate(0, 0, 0);
-                    mAnimator.Play("Move");
-                }
-                if (Input.GetKeyDown(KeyCode.DownArrow))
-                {
-                    speed = 1.2f;
-                    prevPosition = currentPosition;
-                    currentPosition = mTransform.position + new Vector3(0, 0, -1);
-                    nextPosition = currentPosition + (currentPosition - mTransform.position);
-                    mTransform.rotation = new Quaternion(0, 0, 0, 0);
-                    mTransform.Rotate(0, 180, 0);
-                    currentPosition = new Vector3(Mathf.Round(currentPosition.x), Mathf.Round(currentPosition.y), Mathf.Round(currentPosition.z));
-                    mAnimator.Play("Move");
-                }
-                if (Input.GetKeyDown(KeyCode.F))
-                {
-                    speed = 1.2f;
-                    mAnimator.Play("Fall");
+                    if (Input.GetKeyDown(KeyCode.LeftArrow))
+                    {
+                        speed = 1.2f;
+                        prevPosition = currentPosition;
+                        currentPosition = mTransform.position + new Vector3(-1, 0, 0);
+                        nextPosition = currentPosition + (currentPosition - mTransform.position);
+                        mTransform.rotation = new Quaternion(0, 0, 0, 0);
+                        mTransform.Rotate(0, -90, 0);
+                        currentPosition = new Vector3(Mathf.Round(currentPosition.x), (currentPosition.y), Mathf.Round(currentPosition.z));
+                        mAnimator.Play("Move");
+                    }
+                    if (Input.GetKeyDown(KeyCode.RightArrow))
+                    {
+                        speed = 1.2f;
+                        prevPosition = currentPosition;
+                        currentPosition = mTransform.position + new Vector3(1, 0, 0);
+                        nextPosition = currentPosition + (currentPosition - mTransform.position);
+                        mTransform.rotation = new Quaternion(0, 0, 0, 0);
+                        mTransform.Rotate(0, 90, 0);
+                        currentPosition = new Vector3(Mathf.Round(currentPosition.x), (currentPosition.y), Mathf.Round(currentPosition.z));
+                        mAnimator.Play("Move");
+                    }
+                    if (Input.GetKeyDown(KeyCode.UpArrow))
+                    {
+                        speed = 1.2f;
+                        prevPosition = currentPosition;
+                        currentPosition = mTransform.position + new Vector3(0, 0, 1);
+                        nextPosition = currentPosition + (currentPosition - mTransform.position);
+                        mTransform.rotation = new Quaternion(0, 0, 0, 0);
+                        mTransform.Rotate(0, 0, 0);
+                        currentPosition = new Vector3(Mathf.Round(currentPosition.x), (currentPosition.y), Mathf.Round(currentPosition.z));
+                        mAnimator.Play("Move");
+                    }
+                    if (Input.GetKeyDown(KeyCode.DownArrow))
+                    {
+                        speed = 1.2f;
+                        prevPosition = currentPosition;
+                        currentPosition = mTransform.position + new Vector3(0, 0, -1);
+                        nextPosition = currentPosition + (currentPosition - mTransform.position);
+                        mTransform.rotation = new Quaternion(0, 0, 0, 0);
+                        mTransform.Rotate(0, 180, 0);
+                        currentPosition = new Vector3(Mathf.Round(currentPosition.x), (currentPosition.y), Mathf.Round(currentPosition.z));
+                        mAnimator.Play("Move");
+                    }
+                    if (Input.GetKeyDown(KeyCode.F))
+                    {
+                        speed = 1.2f;
+                        mAnimator.Play("Fall");
+                    }
                 }
             }
         }

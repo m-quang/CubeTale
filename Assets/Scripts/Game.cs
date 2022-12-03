@@ -1,17 +1,21 @@
-using OpenCover.Framework.Model;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static UnityEngine.ParticleSystem;
+
 public class Game : MonoBehaviour
 {
-    static public Game instance;
+    public static Game Instance { get; private set; }
 
     [SerializeField]
     public TextAsset jsonfile;
 
     [SerializeField]
-    private int m_Level = 1;
+    public int m_Level = 4;
+
+    [SerializeField]
+    public GameConfig config;
 
     public bool isWin = false;
 
@@ -36,6 +40,12 @@ public class Game : MonoBehaviour
 
     public Player player { set; get; }
 
+    [SerializeField]
+    public ParticleSystem particle;
+    
+    public ParticleSystem particleClone { set; get; }
+
+    public GameObject frontEnd;
 
     #region map
     [System.Serializable]
@@ -68,15 +78,31 @@ public class Game : MonoBehaviour
     GameObject ls;
     #endregion
 
+    [SerializeField]
+    GameButton gameButton;
+
 
     private void Awake()
     {
-        map = JsonUtility.FromJson<Map>(jsonfile.text);
-        int height = map.LevelMap[m_Level].Height;
-        int width = map.LevelMap[m_Level].Width;
-        for (int i = height * width - 1, y = 0; y < map.LevelMap[m_Level].Height; y++)
+        if (Instance != null)
         {
-            for (int x = 0; x < map.LevelMap[m_Level].Width; x++, i--)
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+            //DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(frontEnd);
+        }
+
+        gameButton.InitScene();
+
+        map = JsonUtility.FromJson<Map>(jsonfile.text);
+        int height = map.LevelMap[config.level].Height;
+        int width = map.LevelMap[config.level].Width;
+        for (int i = height * width - 1, y = 0; y < map.LevelMap[config.level].Height; y++)
+        {
+            for (int x = 0; x < map.LevelMap[config.level].Width; x++, i--)
             {
                 CreateMap(i, x, y);
             }
@@ -89,12 +115,21 @@ public class Game : MonoBehaviour
 
     private void Start()
     {
-
+        particle.gameObject.SetActive(false);
     }
 
     private void FixedUpdate()
     {
         updateLazerRay();
+    }
+
+    private void Update()
+    {
+        if (isWin == true)
+        {
+
+        }
+
     }
 
     void LateUpdate()
@@ -103,7 +138,7 @@ public class Game : MonoBehaviour
         {
             createRay();
 
-            // rollback if stand on nothing
+            // rollback if stand in nothing
             if (player.currentStandingBlock == default || isCollider == true)
             {
                 isCollider = false;
@@ -117,26 +152,60 @@ public class Game : MonoBehaviour
             {
                 if (player.currentStandingBlock.name == "RedCube")
                 {
-                    Destroy(player.nextBlock.transform.parent.gameObject);
+                    if (player.nextBlock != default)
+                    {
+                        Destroy(player.nextBlock.transform.parent.gameObject);
+                        particleClone = Instantiate(particle, player.nextBlock.transform.position, Quaternion.Euler(new Vector3(-90, 0, 0)), GameObject.Find("Enviroment").transform);
+                        particleClone.gameObject.SetActive(false);
+                        player.nextBlock = default;
+                    }
                 }
-                if (player.prevousStandBlock.name == "BlackObject")
+
+            }
+
+            if (player.prevousStandBlock)
+            {
+                if (player.prevousStandBlock.name == "RedCube" && player.currentPosition != player.transform.position)
                 {
-                    player.mAnimator.Play("Celebration");
-                    isWin = true;
+                    player.prevousStandBlock.transform.parent.GetComponentInChildren<Animator>().Play("Up");
+                }
+                if (player.prevousStandBlock.name == "YellowCube" && player.currentPosition != player.transform.position)
+                {
+                    player.prevousStandBlock.transform.parent.GetComponentInChildren<Animator>().Play("Up");
                 }
             }
 
-            Debug.Log("currentStandingBlock: " + player.currentStandingBlock);
-            Debug.Log("prevousStandBlock: " + player.prevousStandBlock);
-            Debug.Log("getNextBlock: " + player.nextBlock);
+            /*            Debug.Log("currentStandingBlock: " + player.currentStandingBlock);
+                        Debug.Log("prevousStandBlock: " + player.prevousStandBlock);
+                        Debug.Log("getNextBlock: " + player.nextBlock);*/
         }
+        
+        if (player.currentStandingBlock)
+        {
+
+            if (player.currentStandingBlock.name == "BlackObject" && player.currentPosition == player.transform.position)
+            {
+                if(isWin == false)
+                {
+                    StartCoroutine(Winning());
+                }
+                isWin = true;
+            }
+        }
+    }
+
+    IEnumerator Winning()
+    {
+        player.mAnimator.Play("Celebration");
+        yield return new WaitForSeconds(1);
+        gameButton.ShowPanelScore();
     }
 
     private void CreateMap(int i, int x, int y)
     {
-        if (map.LevelMap[m_Level].Map[i] != "0")
+        if (map.LevelMap[config.level].Map[i] != "0")
         {
-            switch (map.LevelMap[m_Level].Map[i])
+            switch (map.LevelMap[config.level].Map[i])
             {
                 case "x":
                     WhiteCube whiteCube = Instantiate(whiteObject);
@@ -176,7 +245,7 @@ public class Game : MonoBehaviour
                     whiteCube2.localPosition(y, 0, x);
                     enviroments.Add(whiteCube2);
                     player = Instantiate(playerController);
-                    player.transform.localPosition = new Vector3(y, 1, x);
+                    player.transform.localPosition = new Vector3(y, 0.9f, x);
                     break;
                 default:
                     break;
@@ -184,6 +253,16 @@ public class Game : MonoBehaviour
         }
     }
 
+    public void ClearMap()
+    {
+
+    }
+
+    public void RestartLevel()
+    {
+        ClearMap();
+        SceneManager.LoadScene("Game");
+    }
 
     public void createRay()
     {
@@ -224,7 +303,7 @@ public class Game : MonoBehaviour
         // collision ray
         Ray collisionRay = new Ray(player.mTransform.position, player.currentPosition - player.prevPosition);
         RaycastHit collisionHit;
-        if (Physics.Raycast(collisionRay, out collisionHit, 1f, gameLayers))
+        if (Physics.Raycast(collisionRay, out collisionHit, 0.70f, gameLayers))
         {
             isCollider = true;
         }
@@ -235,7 +314,7 @@ public class Game : MonoBehaviour
         // lazer ray
         if (player.currentStandingBlock != default)
         {
-            if (player.currentStandingBlock.name == "YellowCube")
+            if (player.currentStandingBlock.name == "YellowCube" && player.currentPosition == player.transform.position)
             {
                 //Debug.Log("lasing");
                 Ray laserRay = new Ray(player.mTransform.position, player.currentPosition - player.prevPosition);
@@ -252,7 +331,12 @@ public class Game : MonoBehaviour
                     if (destroyLasedObject)
                     {
                         Destroy(laserHit.collider.gameObject);
+                        particleClone = Instantiate(particle, laserHit.collider.transform.position, Quaternion.Euler(new Vector3(-90, 0, 0)), GameObject.Find("Enviroment").transform);
+                        particleClone.startColor = Color.yellow;
+                        particleClone.gameObject.SetActive(true);
                         destroyLasedObject = false;
+                        StopCoroutine("lasing");
+
                     }
                 }
                 else
@@ -275,8 +359,8 @@ public class Game : MonoBehaviour
     {
         if (isLasing)
         {
-            yield return new WaitForSeconds(3f);
-        }
+            yield return new WaitForSeconds(1f);
+        } 
         else
         {
             yield break;

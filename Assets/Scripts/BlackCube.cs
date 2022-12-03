@@ -22,7 +22,14 @@ public class BlackCube : MonoBehaviour, IEnviroment
 
     public void OnDestroy()
     {
-        Destroy(this);
+        if (Game.Instance)
+        {
+            if (Game.Instance.particleClone)
+            {
+                Game.Instance.particleClone.startColor = Color.black;
+                Game.Instance.particleClone.gameObject.SetActive(true);
+            }
+        }
     }
 
     public void localPosition(int x, int y, int z)

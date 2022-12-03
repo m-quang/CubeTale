@@ -6,6 +6,5 @@ public interface IEnviroment
 {
     void Init();
     void OnDestroy();
-
     void Update();
 }

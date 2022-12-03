@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 public class WhiteCube : MonoBehaviour, IEnviroment
 {
@@ -17,11 +18,18 @@ public class WhiteCube : MonoBehaviour, IEnviroment
 
     public void Init()
     {
-
     }
 
     public void OnDestroy()
     {
+        if (Game.Instance)
+        {
+            if (Game.Instance.particleClone)
+            {
+                Game.Instance.particleClone.startColor = Color.white;
+                Game.Instance.particleClone.gameObject.SetActive(true);
+            }
+        }
 
     }
 

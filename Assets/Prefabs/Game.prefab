@@ -45,6 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jsonfile: {fileID: 4900000, guid: 4eebd946576fb70469ca15ba13c9c924, type: 3}
+  m_Level: 1
+  isWin: 0
   whiteObject: {fileID: 8777365134395909529, guid: c23e42ade03c6534e8402030aa240206, type: 3}
   redObject: {fileID: 8991697329319576596, guid: cffea9429a5b6b34d93b62750f96136e, type: 3}
   blueObject: {fileID: 3344040798338217655, guid: 15265ff782e7f5e4e91144a52b04a040, type: 3}
@@ -52,9 +54,10 @@ MonoBehaviour:
   yellowObject: {fileID: 9006055228704725434, guid: a875c5415d4808d4bb7e28b162ccb841, type: 3}
   barrier: {fileID: 2324412406130210653, guid: d3d493ceb0efa324a9127b35482f9b03, type: 3}
   playerController: {fileID: 2255842725070311891, guid: c42fbf803c73aae438860478832591d9, type: 3}
-  laser: {fileID: 715934003401569392, guid: c640191ec33ce2843a5a4ea2fca2dbe2, type: 3}
   gameLayers:
     serializedVersion: 2
     m_Bits: 128
+  particle: {fileID: 6979335239330849120, guid: 4569ce90aa994834780717c01730c73f, type: 3}
   map:
     LevelMap: []
+  laser: {fileID: 715934003401569392, guid: c640191ec33ce2843a5a4ea2fca2dbe2, type: 3}

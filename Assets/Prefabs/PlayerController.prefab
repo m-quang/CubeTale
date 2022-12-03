@@ -45,12 +45,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9091532df0c75354ea7923e73c80bba5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  particleSystem: {fileID: 0}
   currentPosition: {x: 0, y: 0, z: 0}
+  nextPosition: {x: 0, y: 0, z: 0}
+  prevPosition: {x: 0, y: 0, z: 0}
   speed: 0
   layersToHit:
     serializedVersion: 2
     m_Bits: 128
-  laser: {fileID: 715934003401569392, guid: c640191ec33ce2843a5a4ea2fca2dbe2, type: 3}
 --- !u!1001 &7966271570490777076
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 public class YellowCube : MonoBehaviour, IEnviroment
 {
@@ -22,7 +23,14 @@ public class YellowCube : MonoBehaviour, IEnviroment
 
     public void OnDestroy()
     {
-        Destroy(this);
+        if (Game.Instance)
+        {
+            if (Game.Instance.particleClone)
+            {
+                Game.Instance.particleClone.startColor = Color.yellow;
+                Game.Instance.particleClone.gameObject.SetActive(true);
+            }
+        }
     }
 
     public void localPosition(int x, int y, int z)
